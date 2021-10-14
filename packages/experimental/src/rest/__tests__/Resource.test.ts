@@ -26,7 +26,7 @@ export class UserResource extends Resource {
     return this.id?.toString();
   }
 
-  static urlRoot = 'http://test.com/user/';
+  static urlRoot = 'http\\://test.com/user/:id';
 }
 export class PaginatedArticleResource extends Resource {
   readonly id: number | undefined = undefined;
@@ -43,7 +43,7 @@ export class PaginatedArticleResource extends Resource {
     author: UserResource,
   };
 
-  static urlRoot = 'http://test.com/article-paginated/';
+  static urlRoot = 'http://test.com/article-paginated/:id';
 
   static list<T extends typeof Resource>(
     this: T,
@@ -105,6 +105,18 @@ describe('Resource', () => {
 
   afterEach(() => {
     nock.cleanAll();
+  });
+
+  it.only('should create urls', () => {
+    expect(UserResource.detail().url({ id: '5' })).toBe(
+      'http://test.com/user/5',
+    );
+    expect(UserResource.detail().url({ id: '100' })).toBe(
+      'http://test.com/user/100',
+    );
+    expect(UserResource.list().url({ bob: '100' })).toBe(
+      'http://test.com/user/?bob=100',
+    );
   });
 
   it('should automatically name methods', () => {

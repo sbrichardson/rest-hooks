@@ -79,7 +79,8 @@
     "url": "https://github.com/coinbase/rest-hooks/issues"
   },
   "dependencies": {
-    "@babel/runtime": "^7.7.2"
+    "@babel/runtime": "^7.7.2",
+    "path-to-regexp": "^6.2.0"
   },
   "peerDependencies": {
     "@rest-hooks/core": "^2.1.0",

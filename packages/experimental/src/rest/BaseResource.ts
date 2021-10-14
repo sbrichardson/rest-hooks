@@ -1,6 +1,7 @@
 import { Endpoint } from '@rest-hooks/endpoint';
 import type { EndpointExtraOptions, Schema } from '@rest-hooks/endpoint';
 import { EntityRecord } from '@rest-hooks/rest';
+import { compile, PathFunction } from 'path-to-regexp';
 
 import paramsToString from './paramsToString';
 import { RestEndpoint } from './types';
@@ -54,6 +55,18 @@ export default abstract class BaseResource extends EntityRecord {
 
   private declare __url?: string;
 
+  private static _toPath: PathFunction<object>;
+
+  static toPath() {
+    console.log(this.urlRoot);
+    if (!this._toPath)
+      this._toPath = compile(this.urlRoot, {
+        encode: encodeURIComponent,
+        validate: false,
+      });
+    return this._toPath;
+  }
+
   /** Get the url for a SimpleResource
    *
    * Default implementation conforms to common REST patterns
@@ -66,10 +79,7 @@ export default abstract class BaseResource extends EntityRecord {
     ) {
       return urlParams.url;
     }
-    if (this.pk(urlParams as any) !== undefined) {
-      return `${this.urlRoot.replace(/\/$/, '')}/${this.pk(urlParams as any)}`;
-    }
-    return this.urlRoot;
+    return this.toPath()(urlParams);
   }
 
   /** Get the url for many SimpleResources
@@ -79,10 +89,11 @@ export default abstract class BaseResource extends EntityRecord {
   static listUrl(
     searchParams: Readonly<Record<string, string | number | boolean>> = {},
   ): string {
+    const urlBase = this.toPath()(searchParams);
     if (Object.keys(searchParams).length) {
-      return `${this.urlRoot}?${paramsToString(searchParams)}`;
+      return `${urlBase}?${paramsToString(searchParams)}`;
     }
-    return this.urlRoot;
+    return urlBase;
   }
 
   /** Perform network request and resolve with HTTP Response */
